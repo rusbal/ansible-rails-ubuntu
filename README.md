@@ -47,7 +47,7 @@
      - Install puma service
      - Enable puma service
 
-5. ###Install Rails application
+5. ### Install Rails application
 
    - Remove old codebase
    - Clone codebase
