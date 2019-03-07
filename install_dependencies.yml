@@ -1,0 +1,38 @@
+---
+
+- name: Install dependencies
+  hosts: production
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - { role: nginx, tags: nginx }
+    - { role: postgresql, tags: postgresql }
+    - { role: nodejs, tags: nodejs }
+    - role: ruby
+      tags: ruby
+      param_app_name: freebenta
+      param_version: 2.5.3
+  tasks:
+    - name: Install tree
+      apt:
+        name: tree
+        state: present
+    - name: Install build-essential
+      apt:
+        name: build-essential
+        state: present
+
+    - name: Add an Apt signing key for Yarn
+      apt_key:
+        url: https://dl.yarnpkg.com/debian/pubkey.gpg
+        state: present
+    - name: Add Yarn repository
+      apt_repository:
+        repo: deb https://dl.yarnpkg.com/debian/ stable main
+        state: present
+    - name: Install Yarn for Javascript dependencies
+      apt:
+        name: yarn
+        state: present
+        update_cache: yes
+

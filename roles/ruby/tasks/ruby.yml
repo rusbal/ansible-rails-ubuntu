@@ -1,0 +1,50 @@
+---
+
+- name: Install Ruby development headers
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - libffi-dev
+      - libgdbm5
+      - libgdbm-dev
+      - libncurses5-dev
+      - libssl-dev
+      - libreadline6-dev
+      - libyaml-dev
+      - zlib1g-dev
+
+- name: Install build tools
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - autoconf
+      - bison
+      - gcc
+      - make
+
+- name: Install Ruby {{ param_version }} for {{ param_app_name }}
+  become_user: "{{ param_app_name }}"
+  shell: RUBY_CONFIGURE_OPTS=--disable-install-doc ~{{ param_app_name }}/.rbenv/bin/rbenv install {{ param_version }}
+  args:
+    creates: ~{{ param_app_name }}/.rbenv/versions/{{ param_version }}
+
+- name: Set global Ruby {{ param_version }}
+  become_user: "{{ param_app_name }}"
+  shell: ~{{ param_app_name }}/.rbenv/bin/rbenv global {{ param_version }}
+  args:
+    creates: ~{{ param_app_name }}/.rbenv/version
+
+- name: Install Bundler
+  become_user: "{{ param_app_name }}"
+  shell: ~{{ param_app_name }}/.rbenv/shims/gem install bundler -v 1.17.3
+  environment:
+    RBENV_VERSION: "{{ param_version }}"
+  args:
+    creates: ~{{ param_app_name }}/.rbenv/versions/{{ param_version }}/bin/bundle
+

@@ -1,0 +1,5 @@
+[freebenta]
+lightsail_one public_ip=13.250.120.229 private_ip=172.26.0.247
+
+[production:children]
+freebenta

@@ -1,0 +1,10 @@
+/var/www/{{ param_app_name }}/shared/log/*.log {
+  daily
+  rotate 7
+  dateext
+  missingok
+  copytruncate
+  olddir /var/www/{{ param_app_name }}/shared/log/archive
+  compress
+  delaycompress
+}

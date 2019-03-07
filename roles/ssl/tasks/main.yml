@@ -1,0 +1,18 @@
+- name: Generate certificate with nginx module
+  command: certbot certonly --noninteractive --nginx --agree-tos --email {{ param_ssl_email }} --domain {{ item }}
+  args:
+    creates: /etc/letsencrypt/live/{{ item }}
+  with_items: "{{ param_domains }}"
+
+- name: List letencrypt certificate directory
+  command: ls -t1 /etc/letsencrypt/live/
+  register: check_certificates
+
+- name: Get latest certificate directory for vhost-ssl
+  set_fact: latest_certificate="{{ check_certificates.stdout_lines[0] }}"
+
+- name: Copy vhost-ssl
+  template:
+    src: vhost-ssl.conf.j2
+    dest: /etc/nginx/conf.d/{{ param_app_name }}.conf
+  notify: Reload nginx

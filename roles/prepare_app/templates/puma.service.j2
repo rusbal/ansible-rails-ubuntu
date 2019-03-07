@@ -1,0 +1,13 @@
+[Unit]
+Description=Puma {{ param_app_name }} application server
+After=network.target
+
+[Service]
+Type=simple
+User={{ param_app_name }}
+WorkingDirectory=/var/www/{{ param_app_name }}/application
+ExecStart=/home/{{ param_app_name }}/.rbenv/shims/puma -C /var/www/{{ param_app_name }}/shared/config/puma.rb
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

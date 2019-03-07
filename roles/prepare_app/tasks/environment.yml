@@ -1,0 +1,55 @@
+---
+
+- name: Create base directory
+  file:
+    path: /var/www
+    state: directory
+
+- name: Create {{ param_app_name }} directory structure
+  file:
+    path: /var/www/{{ param_app_name }}/{{ item }}
+    state: directory
+    owner: "{{ param_app_name }}"
+  with_items:
+    - application
+    - shared
+    - shared/config
+    - shared/log
+    - shared/log/archive
+    - shared/pids
+    - shared/tmp
+    - shared/tmp/cache
+
+- name: Lock {{ param_app_name }} Ruby version to {{ param_ruby_version }}
+  copy:
+    content: "{{ param_ruby_version }}"
+    dest: /var/www/{{ param_app_name }}/.ruby-version
+    owner: "{{ param_app_name }}"
+    group: "{{ param_app_name }}"
+
+- name: Set default RAILS_ENV
+  copy:
+    content: RAILS_ENV=production
+    dest: ~{{ param_app_name }}/.rbenv/vars
+    owner: "{{ param_app_name }}"
+    group: "{{ param_app_name }}"
+
+- name: Install master key
+  copy:
+    content: "{{ param_master_key }}"
+    dest: /var/www/{{ param_app_name }}/shared/config/master.key
+    owner: "{{ param_app_name }}"
+    group: "{{ param_app_name }}"
+    mode: 0600
+
+- name: Install compiler
+  apt:
+    name: gcc
+    state: present
+    update_cache: yes
+
+- name: Grant {{ param_app_name }} user sudo rights to manage {{ param_app_name }}
+  template:
+    src: sudoers.j2
+    dest: /etc/sudoers.d/{{ param_app_name }}
+    validate: /usr/sbin/visudo -c -f %s

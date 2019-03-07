@@ -1,0 +1,74 @@
+---
+
+- name: Add user
+  user:
+    name: "{{ param_name }}"
+    state: present
+
+- name: Set comment
+  user:
+    name: "{{ param_name }}"
+    comment: "{{ param_comment }}"
+  when: param_comment != ""
+
+- name: Set password
+  user:
+    name: "{{ param_name }}"
+    password: "{{ param_encrypted_password }}"
+  when: param_encrypted_password != ""
+
+- name: Set shell
+  user:
+    name: "{{ param_name }}"
+    shell: "{{ param_shell }}"
+
+- name: Get SSH files
+  command: ls "{{ role_path }}/files/{{ param_name }}"
+  changed_when: false
+  failed_when: false
+  become: no
+  delegate_to: 127.0.0.1
+  register: ssh_files
+
+- block:
+
+  - name: Create .ssh directory
+    file:
+      path: ~{{ param_name }}/.ssh
+      state: directory
+      owner: "{{ param_name }}"
+      group: "{{ param_name }}"
+      mode: 0700
+
+  - name: Copy SSH files
+    copy:
+      src: "{{ param_name }}/{{ item }}"
+      dest: ~{{ param_name }}/.ssh/{{ item }}
+      owner: "{{ param_name }}"
+      group: "{{ param_name }}"
+      mode: 0600
+    with_items: "{{ ssh_files.stdout_lines }}"
+  when: ssh_files.rc == 0
+
+- name: Add sudo rights
+  copy:
+    content: "{{ param_name }} ALL=(ALL) ALL"
+    dest: /etc/sudoers.d/{{ param_name }}
+    mode: 0600
+  when: param_sudo
+
+- name: Remove sudo rights
+  file:
+    path: /etc/sudoers.d/{{ param_name }}
+    state: absent
+  when: param_sudo == false
+
+- name: Remove SSH files
+  file:
+    path: ~{{ param_name }}/.ssh/{{ item }}
+    state: absent
+  when: (ssh_files.rc != 0) or (item not in ssh_files.stdout_lines)
+  with_items:
+    - authorized_keys
+    - id_rsa
+    - id_rsa.pub

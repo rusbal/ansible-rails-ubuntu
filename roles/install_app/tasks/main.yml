@@ -1,0 +1,97 @@
+---
+
+- meta: flush_handlers
+
+- name: Remove old codebase
+  file:
+    state: absent
+    path: /var/www/{{ param_app_name }}/application
+
+- name: Clone {{ param_app_name }} codebase
+  become_user: "{{ param_app_name }}"
+  git:
+    repo: "https://{{ github_username | urlencode }}:{{ github_password }}@github.com/{{ github_username }}/{{ param_git_name }}"
+    dest: /var/www/{{ param_app_name }}/application
+    version: "{{ param_commit }}"
+    update: no
+    accept_hostkey: yes
+  notify: Restart puma
+
+- name: Install {{ param_app_name }} bundle
+  become_user: "{{ param_app_name }}"
+  bundler:
+    state: present
+    exclude_groups: [development, test]
+    executable: ~/.rbenv/shims/bundle
+    chdir: /var/www/{{ param_app_name }}/application
+  register: install_bundle
+
+- name: Check symlinks
+  stat:
+    path: /var/www/{{ param_app_name }}/application/config/database.yml
+  register: check_symlinks
+
+- block:
+
+  - name: Remove files and directories to be symlinked
+    become_user: "{{ param_app_name }}"
+    file:
+      path: /var/www/{{ param_app_name }}/application/{{ item }}
+      state: absent
+    with_items:
+      - config/database.yml
+      - config/master.key
+      - config/puma.rb
+      - log
+      - tmp
+
+  - name: Symlink shared files and directories
+    become_user: "{{ param_app_name }}"
+    file:
+      src: /var/www/{{ param_app_name }}/shared/{{ item }}
+      dest: /var/www/{{ param_app_name }}/application/{{ item }}
+      state: link
+      force: yes
+    with_items:
+      - config/database.yml
+      - config/master.key
+      - config/puma.rb
+      - log
+      - tmp
+
+  when: (not check_symlinks.stat.exists) or (check_symlinks.stat.isreg)
+
+- name: Check database schema
+  become_user: postgres
+  shell: psql --dbname {{ param_database_name }} --command "\dt" | grep schema_migrations
+  changed_when: false
+  failed_when: false
+  register: check_schema_migration
+
+- name: Load {{ param_app_name }} database schema
+  become_user: "{{ param_app_name }}"
+  shell: ~/.rbenv/shims/bundle exec rails db:schema:load
+  args:
+    chdir: /var/www/{{ param_app_name }}/application
+  environment:
+    DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
+  when: check_schema_migration.rc != 0
+
+- name: Check assets
+  find:
+    paths: /var/www/{{ param_app_name }}/application/public/assets
+    patterns: "*.css,*.js"
+  register: check_assets
+
+- name: Precompile {{ param_app_name }} assets
+  become_user: "{{ param_app_name }}"
+  shell: ~/.rbenv/shims/bundle exec rake assets:precompile assets:clean
+  args:
+    chdir: /var/www/{{ param_app_name }}/application
+  when: check_assets.matched == 0
+
+- name: Start puma-{{ param_app_name }} service
+  service:
+    name: puma-{{ param_app_name }}
+    state: started
+  notify: Restart nginx

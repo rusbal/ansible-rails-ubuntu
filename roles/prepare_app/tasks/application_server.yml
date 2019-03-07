@@ -1,0 +1,26 @@
+---
+
+- name: Install Puma
+  become_user: "{{ param_app_name }}"
+  shell: ~/.rbenv/shims/gem install puma
+  args:
+    chdir: /var/www/{{ param_app_name }}/application
+    creates: /home/{{ param_app_name }}/.rbenv/versions/{{ param_ruby_version }}/bin/puma
+
+- name: Copy Puma configuration
+  template:
+    src: puma.rb.j2
+    dest: /var/www/{{ param_app_name }}/shared/config/puma.rb
+    owner: "{{ param_app_name }}"
+    group: "{{ param_app_name }}"
+
+- name: Install Puma service
+  template:
+    src: puma.service.j2
+    dest: /lib/systemd/system/puma-{{ param_app_name }}.service
+    mode: 0755
+
+- name: Enable puma-{{ param_app_name }} service
+  service:
+    name: puma-{{ param_app_name }}
+    enabled: yes

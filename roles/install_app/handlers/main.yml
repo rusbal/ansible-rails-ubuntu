@@ -1,0 +1,11 @@
+---
+
+- name: Restart puma
+  service:
+    name: puma-{{ param_app_name }}
+    state: restarted
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted

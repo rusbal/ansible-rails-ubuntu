@@ -1,0 +1,6 @@
+---
+
+- name: Configure {{ param_app_name }} logrotation
+  template:
+    src: logrotate.j2
+    dest: /etc/logrotate.d/{{ param_app_name }}

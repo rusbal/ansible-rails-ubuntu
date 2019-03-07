@@ -1,0 +1,26 @@
+---
+
+- name: Install rbenv for {{ param_app_name }}
+  become_user: "{{ param_app_name }}"
+  git:
+    repo: https://github.com/rbenv/rbenv.git
+    dest: ~{{ param_app_name }}/.rbenv
+    accept_hostkey: yes
+    update: no
+
+- name: Install rbenv plugins for {{ param_app_name }}
+  become_user: "{{ param_app_name }}"
+  git:
+    repo: https://github.com/rbenv/{{ item }}.git
+    dest: ~{{ param_app_name }}/.rbenv/plugins/{{ item }}
+    accept_hostkey: yes
+    update: no
+  with_items:
+    - ruby-build
+    - rbenv-vars
+    - rbenv-gem-rehash
+
+- name: Install rbenv loader
+  copy:
+    src: rbenv.sh
+    dest: /etc/profile.d/rbenv.sh

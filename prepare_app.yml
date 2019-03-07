@@ -1,0 +1,25 @@
+---
+
+- name: Prepare environment for Rails App
+  hosts: production
+  remote_user: ubuntu
+  become: yes
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+  roles:
+    - role: prepare_app
+      param_app_name: freebenta
+      param_master_key: "{{ freebenta_master_key }}"
+      param_branch: "{{ freebenta_branch }}"
+      param_commit: "{{ freebenta_commit }}"
+      param_ruby_version: 2.5.3
+      param_bind_port: 10000
+      param_database_name: freebenta_db
+      param_database_user: freebenta_user
+      param_database_password: default
+      param_database_host: localhost
+      param_domains:
+        - freebenta.philippinedev.com

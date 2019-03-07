@@ -1,0 +1,35 @@
+---
+
+- name: Install PostgreSQL and prerequisites
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - postgresql
+      - postgresql-contrib
+      - python-psycopg2
+
+- name: Install PostgreSQL development headers
+  apt:
+    name: libpq-dev
+    state: present
+    update_cache: yes
+
+- name: Copy PostgreSQL authentication configuration
+  become_user: postgres
+  copy:
+    src: pg_hba.conf
+    dest: /etc/postgresql/10/main/pg_hba.conf
+  notify: Restart PostgreSQL
+
+- name: Start PostgreSQL
+  service:
+    name: postgresql
+    state: started
+
+- name: Enable PostgreSQL
+  service:
+    name: postgresql
+    enabled: yes

@@ -1,0 +1,9 @@
+production:
+  adapter: postgresql
+  encoding: unicode
+  reconnect: true
+  pool: 16
+  database: {{ param_database_name }}
+  username: {{ param_database_user }}
+  password: {{ param_database_password }}
+  host: {{ param_database_host }}

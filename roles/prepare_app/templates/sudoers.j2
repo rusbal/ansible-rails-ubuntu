@@ -1,0 +1,5 @@
+app ALL= NOPASSWD: /usr/sbin/service * puma-{{ param_app_name }}.service
+
+Defaults: {{ param_app_name }} !requiretty
+Defaults: {{ param_app_name }} env_reset
+Defaults: {{ param_app_name }} env_keep += "RAILS_ENV"

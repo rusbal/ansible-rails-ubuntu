@@ -1,0 +1,19 @@
+workers 1
+threads 0, 16
+bind "tcp://{{ private_ip }}:{{ param_bind_port }}"
+
+environment "production"
+
+shared_dir = "/var/www/{{ param_app_name }}/shared"
+stdout_redirect "#{shared_dir}/log/puma.stdout.log", "#{shared_dir}/log/puma.stderr.log", true
+pidfile "#{shared_dir}/pids/puma.pid"
+
+preload_app!
+
+before_fork do
+  ActiveRecord::Base.connection_pool.disconnect! if defined?(ActiveRecord)
+end
+
+on_worker_boot do
+  ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+end

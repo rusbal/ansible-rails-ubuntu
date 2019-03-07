@@ -1,0 +1,12 @@
+---
+
+- name: Linux user creation
+  hosts: production
+  remote_user: ubuntu
+  gather_facts: no
+  become: yes
+  roles:
+    - role: user
+      param_name: freebenta
+      param_comment: Application user
+      param_sudo: yes
