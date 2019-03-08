@@ -2,10 +2,18 @@
 
 - meta: flush_handlers
 
+- name: Check symlinks
+  stat:
+    path: /var/www/{{ param_app_name }}/application/config/database.yml
+  register: check_symlinks
+
+- set_fact: is_installation="{{ (not check_symlinks.stat.exists) or (check_symlinks.stat.isreg) }}"
+
 - name: Remove old codebase
   file:
     state: absent
     path: /var/www/{{ param_app_name }}/application
+  when: is_installation
 
 - name: Clone {{ param_app_name }} codebase
   become_user: "{{ param_app_name }}"
@@ -25,11 +33,6 @@
     executable: ~/.rbenv/shims/bundle
     chdir: /var/www/{{ param_app_name }}/application
   register: install_bundle
-
-- name: Check symlinks
-  stat:
-    path: /var/www/{{ param_app_name }}/application/config/database.yml
-  register: check_symlinks
 
 - block:
 
@@ -59,7 +62,7 @@
       - log
       - tmp
 
-  when: (not check_symlinks.stat.exists) or (check_symlinks.stat.isreg)
+  when: is_installation
 
 - name: Check database schema
   become_user: postgres
