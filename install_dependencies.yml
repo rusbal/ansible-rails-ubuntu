@@ -36,3 +36,11 @@
         state: present
         update_cache: yes
 
+    - name: Install Imagemagick
+      action: apt pkg={{ item }} state=latest
+      sudo: yes
+      with_items:
+        - imagemagick
+        - libmagickcore-dev
+        - libmagickwand-dev
+
