@@ -12,4 +12,4 @@
       param_master_key: "{{ freebenta_master_key }}"
       param_branch: "{{ freebenta_branch }}"
       param_git_name: "{{ freebenta_git_name }}"
-      param_commit: 2743204
+      param_commit: 33c5aa4
