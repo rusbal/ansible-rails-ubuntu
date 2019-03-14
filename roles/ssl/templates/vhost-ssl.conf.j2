@@ -3,7 +3,7 @@ upstream {{ param_app_name }} {
 }
 {% for domain in param_domains %}
 server {
-  server_name {{ domain }};
+  server_name www.{{ domain }};
 
   root /var/www/{{ param_app_name }}/application/public;
   client_max_body_size 4G;
@@ -45,13 +45,27 @@ server {
   include /etc/letsencrypt/options-ssl-nginx.conf;
   ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
-  error_page 497 https://{{ domain }}$request_uri;
+  error_page 497 https://www.{{ domain }}$request_uri;
 }
 
 server {
-  return 301 https://{{ domain }}$request_uri;
+  listen 443 ssl;
+
+  ssl_certificate /etc/letsencrypt/live/{{ latest_certificate }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ latest_certificate }}/privkey.pem;
+  include /etc/letsencrypt/options-ssl-nginx.conf;
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
   server_name {{ domain }};
+  return 301 https://www.{{ domain }}$request_uri;
+}
+
+server {
   listen 80;
+
+  server_name {{ domain }};
+  return 301 https://www.{{ domain }}$request_uri;
+
   return 404;
 }
 {% endfor %}

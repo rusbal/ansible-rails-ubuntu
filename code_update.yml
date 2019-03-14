@@ -12,4 +12,4 @@
       param_branch: "{{ freebenta_branch }}"
       param_git_name: "{{ freebenta_git_name }}"
       param_ruby_version: 2.5.3
-      param_commit: de0b030
+      param_commit: 445827b

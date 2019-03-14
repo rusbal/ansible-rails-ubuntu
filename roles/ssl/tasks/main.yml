@@ -1,5 +1,5 @@
 - name: Generate certificate with nginx module
-  command: certbot certonly --noninteractive --nginx --agree-tos --email {{ param_ssl_email }} --domain {{ item }}
+  command: certbot certonly --noninteractive --nginx --agree-tos --email {{ param_ssl_email }} --domain {{ item }} --domain www.{{ item }}
   args:
     creates: /etc/letsencrypt/live/{{ item }}
   with_items: "{{ param_domains }}"
