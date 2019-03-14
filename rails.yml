@@ -10,6 +10,6 @@
       param_master_key: "{{ freebenta_master_key }}"
       param_branch: "{{ freebenta_branch }}"
       param_git_name: "{{ freebenta_git_name }}"
-      param_commit: "{{ freebenta_commit }}"
+      param_commit: 967d72f
       param_ruby_version: 2.5.3
       param_database_name: "{{ db_name }}"
