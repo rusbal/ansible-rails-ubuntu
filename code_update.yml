@@ -6,10 +6,10 @@
   become: yes
   roles:
     - role: update_app
-      param_app_name: freebenta
-      param_ruby_version: 2.5.3
-      param_database_name: freebenta_db
+      param_app_name: "{{ app_name }}"
+      param_database_name: "{{ db_name }}"
       param_master_key: "{{ freebenta_master_key }}"
       param_branch: "{{ freebenta_branch }}"
       param_git_name: "{{ freebenta_git_name }}"
+      param_ruby_version: 2.5.3
       param_commit: 33c5aa4

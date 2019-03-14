@@ -1,0 +1,21 @@
+---
+
+#-- Users
+user_encrypted_ansible_password: "{{ vault_user_ansible_password }}"
+
+#-- Application key
+freebenta_master_key: "{{ vault_master_key }}"
+
+#-- Github variables
+github_username: "{{ vault_github_username }}"
+github_password: "{{ vault_github_password }}"
+freebenta_git_name: freebenta.git
+freebenta_branch: master
+freebenta_commit: 29f0ec8
+
+app_name: freebenta_2019
+db_name: freebenta_2019_db
+db_user: freebenta_2019_db_user
+domain: freebenta.com
+dedicated_sys_user: freebenta_2019
+admin_email: raymond@philippinedev.com

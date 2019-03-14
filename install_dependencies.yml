@@ -10,7 +10,7 @@
     - { role: nodejs, tags: nodejs }
     - role: ruby
       tags: ruby
-      param_app_name: freebenta
+      param_app_name: "{{ app_name }}"
       param_version: 2.5.3
   tasks:
     - name: Install tree

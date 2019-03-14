@@ -11,8 +11,8 @@
         state: reloaded
   roles:
     - role: ssl
-      param_app_name: freebenta
-      param_ssl_email: raymond@philippinedev.com
+      param_app_name: "{{ app_name }}"
+      param_ssl_email: "{{ admin_email }}"
       param_bind_port: 10000
       param_domains:
-        - freebenta.philippinedev.com
+        - "{{ domain }}"

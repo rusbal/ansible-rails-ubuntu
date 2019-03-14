@@ -14,24 +14,24 @@
 
     - name: Stop web application
       service:
-        name: puma-freebenta
+        name: puma-{{ app_name }}
         state: stopped
 
-    - name: Destroy freebenta database
+    - name: Destroy {{ db_name }} database
       become_user: postgres
       postgresql_db:
         login_user: postgres
         name: freebenta_db
         state: absent
 
-    - name: Create freebenta database
+    - name: Create {{ db_name }} database
       become_user: postgres
       postgresql_db:
         login_user: postgres
         name: freebenta_db
         state: present
 
-    - name: Create freebenta database user
+    - name: Create {{ db_user }} database user
       become_user: postgres
       postgresql_user:
         login_user: postgres
@@ -41,22 +41,22 @@
         priv: ALL
         state: present
 
-    - name: Load freebenta database schema
-      become_user: freebenta
+    - name: Load {{ db_name }} database schema
+      become_user: "{{ dedicated_sys_user }}"
       shell: ~/.rbenv/shims/bundle exec rails db:schema:load
       args:
-        chdir: /var/www/freebenta/application
+        chdir: /var/www/{{ app_name }}/application
       environment:
         DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
 
     - name: Seed database with test data
-      become_user: freebenta
+      become_user: "{{ dedicated_sys_user }}"
       shell: ~/.rbenv/shims/bundle exec rake db:seed
       args:
-        chdir: /var/www/freebenta/application
+        chdir: /var/www/{{ app_name }}/application
 
     - name: Restart puma
       service:
-        name: puma-freebenta
+        name: puma-{{ app_name }}
         state: restarted
 
