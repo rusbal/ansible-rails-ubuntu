@@ -1,0 +1,56 @@
+---
+
+- name: Destroy web app
+  hosts: production
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+
+  vars:
+    app_name: freebenta
+    db_name: freebenta_db
+
+  vars_prompt:
+    - name: "destroy_confirmation"
+      prompt: "Destroy app? (yes/no)?"
+      private: no
+
+  tasks:
+
+    - name: 'Job abort check'
+      fail: msg="Job aborted."
+      when: destroy_confirmation == "no"
+
+    - name: Stop web application
+      service:
+        name: puma-{{ app_name }}
+        state: stopped
+
+    - name: Destroy {{ db_name }} database
+      become_user: postgres
+      postgresql_db:
+        login_user: postgres
+        name: "{{ db_name }}"
+        state: absent
+
+    - name: Destroy app files
+      file:
+        path: "/var/www/{{ app_name }}"
+        state: absent
+
+    - name: Destroy nginx host
+      file:
+        path: "/etc/nginx/conf.d/{{ app_name }}.conf"
+        state: absent
+
+    - name: Remove the user {{ app_name }}
+      user:
+        name: "{{ app_name }}"
+        state: absent
+        remove: yes
+
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+
